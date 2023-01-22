@@ -1,3 +1,5 @@
+import { createEvent, createStore } from "effector";
+
 export interface Todo {
   id: number;
   text: string;
@@ -28,3 +30,27 @@ const addTodoToTodoList = (todos: Todo[], text: string): Todo[] => [
     done: false,
   },
 ];
+
+type Store = {
+  todos: Todo[];
+  newTodo: string;
+}
+
+export const setNewTodo = createEvent<string>();
+export const addTodo = createEvent();
+
+const store = createStore<Store>({
+  todos: [],
+  newTodo: '',
+})
+  .on(setNewTodo, (state, newTodo) => ({
+    ...state,
+    newTodo
+  }))
+  .on(addTodo, (state) => ({
+    ...state,
+    newTodo: '',
+    todos: addTodoToTodoList(state.todos, state.newTodo)
+  }))
+
+export default store;
