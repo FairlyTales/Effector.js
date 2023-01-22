@@ -1,9 +1,16 @@
-import { createEvent, createStore } from "effector";
+import { createEffect, createEvent, createStore } from "effector";
 
 export interface Todo {
   id: number;
   text: string;
   done: boolean;
+}
+
+export interface JSONPlaceholderTodoItem {
+  id: number;
+  userId: number
+  title: string;
+  checked: boolean;
 }
 
 const updateTodo = (todos: Todo[], id: number, text: string): Todo[] =>
@@ -42,10 +49,25 @@ export const update = createEvent<{ id: number; text: string }>();
 export const toggle = createEvent<number>();
 export const remove = createEvent<number>();
 
+export const fetchAsyncDataFx = createEffect(async () => {
+  const res = await fetch('https://jsonplaceholder.typicode.com/todos');
+
+  return res.json();
+})
+
 const store = createStore<Store>({
   todos: [],
   newTodo: '',
 })
+  .on(fetchAsyncDataFx.done, (state, newData) => ({
+      ...state,
+      todos: newData.result.map((item: JSONPlaceholderTodoItem) => ({
+        id: item.id,
+        text: item.title,
+        done: item.checked
+      }))
+    })
+  )
   .on(setNewTodo, (state, newTodo) => ({
     ...state,
     newTodo
