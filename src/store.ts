@@ -38,6 +38,9 @@ type Store = {
 
 export const setNewTodo = createEvent<string>();
 export const addTodo = createEvent();
+export const update = createEvent<{ id: number; text: string }>();
+export const toggle = createEvent<number>();
+export const remove = createEvent<number>();
 
 const store = createStore<Store>({
   todos: [],
@@ -51,6 +54,18 @@ const store = createStore<Store>({
     ...state,
     newTodo: '',
     todos: addTodoToTodoList(state.todos, state.newTodo)
+  }))
+  .on(update, (state, todo) => ({
+    ...state,
+    todos: updateTodo(state.todos, todo.id, todo.text),
+  }))
+  .on(toggle, (state, todoId) => ({
+    ...state,
+    todos: toggleTodo(state.todos, todoId),
+  }))
+  .on(remove, (state, todoId) => ({
+    ...state,
+    todos: removeTodo(state.todos, todoId),
   }))
 
 export default store;
